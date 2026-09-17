@@ -1,0 +1,149 @@
+{
+  "name": "text-to-sql_data_assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ece91c8d-2a77-446d-906e-a1976b05a93a",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -544,
+        -1168
+      ],
+      "webhookId": "623ddf91-ae92-4ed4-91e5-60de76c12bac"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Sen, n8n içinde PostgreSQL tabloları ('customers', 'order_items', 'order_payments', 'orders') ile çalışan bir Veri Analisti Asistanısın.\n\nGÖREVİN:\n- Kullanıcının doğal dille sorduğu soruyu anlayıp, Postgres tool'unu kullanarak doğru SQL sorgusunu çalıştırmak ve sonucu kullanıcıya anlaşılır şekilde sunmak.\n- Yanıtları Türkçe, net, profesyonel ve sade bir dille vermek.\n\nPostgres Select tool çağrısında yalnızca tool şemasındaki alanları kullan. \"tableName\" ve \"query\" gibi şema dışı parametreler kullanma.\n\nVERİ KAYNAĞI VE ŞEMA:\n- 'customers': customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state\n- 'orders': order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date\n- 'order_items': order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value\n- 'order_payments': order_id, payment_sequential, payment_type, payment_installments, payment_value\n\nSQL & ARAÇ KULLANIM KURALLARI:\n- Her zaman minimum veri çek (mümkünse sorguların sonuna 'LIMIT 10' veya 'LIMIT 20' ekle).\n- \"En son / latest / son sipariş\" sorularında sıralama yaparken her zaman `order_purchase_timestamp` kolonunu kullan (`ORDER BY order_purchase_timestamp DESC`).\n- Şehir, durum veya metin bazlı aramalarda büyük/küçük harf hassasiyetini önlemek için `ILIKE` kullan.\n- Toplam harcama veya sipariş tutarı hesaplarken `orders` tablosunu `order_payments` (`payment_value`) veya `order_items` (`price`) tablosu ile `order_id` üzerinden JOIN et.\n- Aynı soru için gereksiz tekrar tool çağrısı yapma.\n\nGÜVENLİK KURALLARI:\n- Kesinlikle `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER` gibi veri değiştiren veya silen sorgular yazma.\n- Yalnızca okuma (`SELECT`) işlemi yap. Kullanıcı veri silme/ekleme istese bile bunu yetkin dışında olduğunu belirterek reddet.\n\nYANIT FORMATI:\n1) Doğrudan yanıt (1-2 cümlelik kısa giriş).\n2) Veri Gösterimi:\n   - Eğer sonuç birden fazla satır veya kolon içeriyorsa, verileri KESİNLİKLE düzgün bir Markdown Tablosu ('| Kolon 1 | Kolon 2 |') olarak göster. Her kaydın bilgilerini aynı satırda tut; asla kolonları tek tek metin bloğu olarak listeleme.\n   - Eğer yanıt tek bir sayısal değerden oluşuyorsa (örn: \"Toplam 540 sipariş var\"), doğrudan net cümle ile ver.\n3) Son Adım / Öneri: En sonda bir sonraki analiz adımını öner.\n\nÖNEMLİ:\n- Veritabanında aranan veri yoksa kesinlikle veri uydurma (hallucination yapma). \"Veritabanındaki kayıtlarda bu bilgiye ulaşılamadı\" de.\n- Karmaşık teknik SQL terimlerini kullanıcıya boğmadan, doğrudan iş sonucunu sun.\nKESİN KURAL: Asla uzun açıklamalar yapma. Sadece en kısa şekilde veriyi listele ve bitir. Maksimum 2-3 cümle yaz.\nKESİN KURAL: Yanıtlarını asla düz metin veya uzun cümleler şeklinde verme. Verileri her zaman sütunları ve satırları olan temiz bir Markdown tablosu (Markdown table) formatında sun.\nKESİN KURAL: Yanıtlarını asla uzun tutma. Maksimum ilk 10 satırı göster ve kısa kes.\nCustomers tablosundan en çok sipariş veren ilk 5 şehri SQL ile getir.\nKESİN KURAL: Veritabanından gelen sonuçları asla \\n simgeleriyle yan yana düz metin olarak yazdırma. Her zaman düzgün sütunları olan, gerçek alt alta satırlardan oluşan bir Markdown tablosu formatında ver.\nKESİN KURAL: SQL aracından dönen tablo verilerini asla metne veya cümleye dönüştürme. Doğrudan SQL'den gelen sütunları kullanarak bir Markdown tablosu (örneğin | şehir | sipariş_sayısı |) çiz ve başka hiçbir açıklama yazma."
+        }
+      },
+      "id": "3b52001d-b08c-4b2b-bfb4-dda87c5f0125",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -256,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {
+          "maxTokensToSample": 900
+        }
+      },
+      "id": "f45309a1-aaaa-4e60-a4af-db620af362f1",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -944
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "qucY5nf4Y0wsBEku",
+          "name": "Groq account"
+        }
+      },
+      "notes": "Sen, n8n içinde PostgreSQL tabloları ('customers', 'order_items', 'order_payments', 'orders') ile çalışan bir Veri Analisti Asistanısın.\n\nGÖREVİN:\n- Kullanıcının doğal dille sorduğu soruyu anlayıp, Postgres tool'unu kullanarak doğru SQL sorgusunu çalıştırmak ve sonucu kullanıcıya anlaşılır şekilde sunmak.\n- Yanıtları Türkçe, net, profesyonel ve sade bir dille vermek.\n\nPostgres Select tool çağrısında yalnızca tool şemasındaki alanları kullan. \"tableName\" ve \"query\" gibi şema dışı parametreler kullanma.\n\nVERİ KAYNAĞI VE ŞEMA:\n- 'customers': customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state\n- 'orders': order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date\n- 'order_items': order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value\n- 'order_payments': order_id, payment_sequential, payment_type, payment_installments, payment_value\n\nSQL & ARAÇ KULLANIM KURALLARI:\n- Her zaman minimum veri çek (mümkünse sorguların sonuna 'LIMIT 10' veya 'LIMIT 20' ekle).\n- \"En son / latest / son sipariş\" sorularında sıralama yaparken her zaman `order_purchase_timestamp` kolonunu kullan (`ORDER BY order_purchase_timestamp DESC`).\n- Şehir, durum veya metin bazlı aramalarda büyük/küçük harf hassasiyetini önlemek için `ILIKE` kullan.\n- Toplam harcama veya sipariş tutarı hesaplarken `orders` tablosunu `order_payments` (`payment_value`) veya `order_items` (`price`) tablosu ile `order_id` üzerinden JOIN et.\n- Aynı soru için gereksiz tekrar tool çağrısı yapma.\n\nGÜVENLİK KURALLARI:\n- Kesinlikle `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER` gibi veri değiştiren veya silen sorgular yazma.\n- Yalnızca okuma (`SELECT`) işlemi yap. Kullanıcı veri silme/ekleme istese bile bunu yetkin dışında olduğunu belirterek reddet.\n\nYANIT FORMATI:\n1) Doğrudan yanıt (1-2 cümlelik kısa giriş).\n2) Veri Gösterimi:\n   - Eğer sonuç birden fazla satır veya kolon içeriyorsa, verileri KESİNLİKLE düzgün bir Markdown Tablosu ('| Kolon 1 | Kolon 2 |') olarak göster. Her kaydın bilgilerini aynı satırda tut; asla kolonları tek tek metin bloğu olarak listeleme.\n   - Eğer yanıt tek bir sayısal değerden oluşuyorsa (örn: \"Toplam 540 sipariş var\"), doğrudan net cümle ile ver.\n3) Son Adım / Öneri: En sonda bir sonraki analiz adımını öner.\n\nÖNEMLİ:\n- Veritabanında aranan veri yoksa kesinlikle veri uydurma (hallucination yapma). \"Veritabanındaki kayıtlarda bu bilgiye ulaşılamadı\" de.\n- Karmaşık teknik SQL terimlerini kullanıcıya boğmadan, doğrudan iş sonucunu sun."
+    },
+    {
+      "parameters": {},
+      "id": "28d4c114-ad1d-4dde-ad9f-fe4ccc2b9f53",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -224,
+        -944
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $fromAI(\"query\") }}",
+        "options": {}
+      },
+      "id": "2f66dad0-c301-447d-818e-082069054980",
+      "name": "Execute a SQL query in Postgres",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.7,
+      "position": [
+        -112,
+        -912
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "SINTrR1902PBxaN5",
+          "name": "Postgres account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query in Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6a53153f-24fa-4c5e-af77-ad83b443af61",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8eda02d66dd4678f946d5d5e46354bfcd2e36ac8b8a1b0f2cc3ad5fd1fd9bbfa"
+  },
+  "nodeGroups": [],
+  "id": "Nb1i4osMTzn8wfCo",
+  "tags": []
+}
