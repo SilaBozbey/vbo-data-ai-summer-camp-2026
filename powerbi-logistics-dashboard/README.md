@@ -7,3 +7,11 @@ Bu projede Olist e-ticaret veri seti kullanılarak şirket yönetiminin kargo ma
 - **Temel Metrikler:** Toplam Kargo Tutarı, Sipariş Başı Ortalama Yük (DAX ölçüleri ile).
 - **Görselleştirmeler:** Zaman trendi (Kargo ve Satış kıyaslaması), ürün bazlı kargo dağılımı ve eyalet bazlı matris tablosu.
 - **Koşullu Biçimlendirme:** Kargo/Satış oranı %20'nin üzerinde olan eyaletlerin dinamik olarak kırmızı renkle vurgulanması.
+
+## 🖼️ Proje Görselleri
+
+### Veri Modeli (Star Schema)
+![Veri Modeli](./Olist_Logistic&Cargo_Data_Model.PNG)
+
+### Dashboard Görünümü
+![Dashboard](./Olist_Logistics&Cargo_Report.PNG)
