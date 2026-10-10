@@ -1,4 +1,4 @@
-# SQL ile E-Veri Analizi (Olist Dataset - Hafta 1)
+# SQL ile E-Veri Analizi (Olist Dataset)
 
 Bu klasörde, Olist Brezilya E-Ticaret veri seti kullanılarak Neon Console (SQL Editor) üzerinde gerçekleştirilen SQL sorgulama ödevine ait kodlar ve sonuçlar yer almaktadır.
 
